@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>G5 Caps — Mayoreo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Bebas+Neue&family=Black+Ops+One&family=Bungee&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css.css">
+  <style>
+    :root{
+      --bg:#ffffff; --card:#fff; --text:#111114; --muted:#646a73; --accent:#111111; --border:#e7e9ee; --shadow:0 10px 25px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{ margin:0; background:var(--bg); color:var(--text); font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif; overflow-x:hidden }
+    a{color:inherit; text-decoration:none}
+    .container{max-width:1200px; margin:0 auto; padding:0 20px}
+    /* Navbar */
+    .nav{position:sticky; top:0; z-index:50; backdrop-filter:saturate(140%) blur(6px); background-color:#ffffffea; border-bottom:1px solid var(--border)}
+    .nav-inner{display:flex; align-items:center; justify-content:space-between; padding:14px 0; position:relative}
+    .brand{display:flex; align-items:center; gap:12px; position:absolute; left:50%; transform:translateX(-50%)}
+    .brand .logo{width:40px; height:40px; border-radius:8px; background:#111; color:#fff; display:grid; place-items:center; font-weight:700}
+    /* Estilo de marca */
+    .brand .name{font-family:'Bebas Neue', Montserrat, sans-serif; font-weight:700; letter-spacing:.5px; font-size:1.3rem}
+    .logo-cholo{font-family:"Black Ops One","Bungee", Montserrat, sans-serif}
+    .nav .right{display:flex; align-items:center; gap:6px; margin-left:auto}
+    .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 14px; border-radius:12px; font-weight:700; border:1px solid var(--border); background:#f7f8fb; color:var(--text)}
+    .btn.primary{background:var(--accent); color:#fff; border-color:#000}
+    .btn:hover{filter:brightness(105%)}
+    .icon-btn{border:1px solid var(--border); background:#fff; width:40px; height:40px; border-radius:10px; display:grid; place-items:center; cursor:pointer}
+    .icon-btn svg{width:20px; height:20px}
+    .cart-btn{position:relative}
+    .cart-count{position:absolute; top:-6px; right:-6px; background:#111; color:#fff; border-radius:999px; padding:2px 7px; font-size:.75rem}
+    .search-wrap{display:flex; align-items:center; gap:6px}
+    .search-input{width:0; opacity:0; transition:.2s; border:1px solid var(--border); border-radius:10px; padding:8px 10px}
+    .search-wrap.active .search-input{width:220px; opacity:1}
+
+    /* (limpieza) Se removieron estilos de Hero no utilizados */
+
+    /* Grid productos */
+    .grid{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:48px}
+    @media (max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}}
+    @media (max-width:720px){.grid{grid-template-columns:repeat(2,1fr)}}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; box-shadow:var(--shadow)}
+    .card .img-wrap{position:relative; aspect-ratio:1/1; background:#fff}
+    .card img{width:100%; height:100%; object-fit:cover; object-position:center}
+    /* Para ciertos modelos queremos ver la gorra completa centrada (sin recorte) */
+    .card img.fit-contain{object-fit:contain !important; object-position:center; background:#fff}
+    /* Ocultamos la etiqueta superior para evitar sensación de descuento/promoción */
+    .badge{display:none}
+    /* Estado sin stock: deshabilitar quick-add y mostrar chip */
+    .card.out-of-stock{opacity:.95}
+    .card.out-of-stock .add-cart{pointer-events:none; opacity:.5}
+    .card.out-of-stock .badge{display:inline-block !important; background:#fff; color:#e00000; border:1px solid #e00000; font-weight:700}
+    .card.out-of-stock .price{color:#888}
+    /* Botón flotante para agregar al carrito desde el catálogo */
+    .add-cart{position:absolute; bottom:10px; right:10px; width:40px; height:40px; border-radius:999px; display:grid; place-items:center; background:#fff; border:1px solid var(--border); box-shadow:var(--shadow); cursor:pointer; z-index:2}
+    .add-cart svg{width:22px; height:22px}
+    .add-cart:hover{filter:brightness(105%)}
+    /* Centramos el nombre y ponemos tipografía más delgada */
+    .card .info{padding:14px 14px 12px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:90px}
+    .card .title{font-weight:300; font-size:1rem; letter-spacing:.2px; margin:6px 0 4px}
+    /* Mostramos el precio debajo del nombre, con un peso medio para legibilidad */
+    .card .price{color:#111; font-weight:600; margin:4px 0 8px}
+    .card .meta{color:var(--muted); font-size:.9rem}
+    /* (limpieza) Se removieron utilidades de especificaciones y actions no utilizadas */
+
+    /* Drawer (canasta) */
+    .overlay{position:fixed; inset:0; background:rgba(0,0,0,.35); opacity:0; pointer-events:none; transition:.2s}
+    .overlay.active{opacity:1; pointer-events:auto}
+    .drawer{position:fixed; top:0; right:-420px; width:420px; max-width:95vw; height:100vh; background:#fff; border-left:1px solid var(--border); box-shadow:var(--shadow); transition:right .25s ease; z-index:100}
+    .drawer.active{right:0}
+    .drawer .head{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--border)}
+    .drawer .items{padding:10px 12px; max-height:calc(100vh - 210px); overflow:auto}
+    .drawer .item{display:grid; grid-template-columns:64px 1fr auto; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid var(--border)}
+    .drawer .item img{width:64px; height:64px; object-fit:cover; border-radius:8px; border:1px solid var(--border)}
+    .drawer .qty{display:inline-flex; align-items:center; gap:8px}
+    .drawer .qty button{border:1px solid var(--border); background:#f7f8fb; padding:4px 10px; border-radius:8px}
+    .drawer .foot{border-top:1px solid var(--border); padding:14px 16px}
+    .foot .row{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
+
+    /* Info y footer */
+.container.info{margin:40px 0; display:flex; justify-content:flex-end; align-items:flex-start; gap:24px; flex-wrap:nowrap; padding-right:36px}
+@media (max-width:900px){.container.info{flex-direction:column; align-items:center; justify-content:center; flex-wrap:wrap; padding-right:0}}
+.container.info .box{flex:0 0 480px}
+.info .box{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:var(--shadow)}
+/* Caja de contacto centrada */
+.contact-box{max-width:900px; margin:0 0 0 auto; text-align:center}
+@media (max-width:900px){.contact-box{margin:0 auto}}
+    .info h3{margin:0 0 8px}
+    .list{margin:0; padding-left:18px; color:var(--muted)}
+    footer{border-top:1px solid var(--border); padding:30px 0; color:var(--muted)}
+
+    /* Portada superior para marcas (full-bleed). Mostrar imagen completa sin recortes y rellenar las orillas con un fondo suavemente desenfocado */
+    .brand-hero-wrap{padding:0 !important}
+.brand-hero{height:100vh; width:100vw; margin:0; border:none; border-radius:0; position:relative; left:50%; transform:translateX(-50%); overflow:hidden; background-color:#fff; display:flex; align-items:center; justify-content:center}
+    .brand-hero::before{content:""; position:absolute; inset:0; background:url('https://7hats.mx/cdn/shop/files/IMG_9651.jpg?v=1730070159') center/cover no-repeat; filter:blur(18px) brightness(.98); transform:scale(1.05)}
+.brand-hero-img{position:relative; z-index:1; width:100%; height:100%; object-fit:contain; object-position:center; display:block}
+    /* Franja promocional dorada entre portada y marcas (alta legibilidad) */
+    .promo-strip{position:relative; z-index:5; padding:14px 0; background:transparent; border-top:none; border-bottom:none; box-shadow:none; overflow:hidden}
+    /* Marquee continuo sin recortes: pista con contenido duplicado */
+    .promo-strip .marquee{overflow:hidden}
+    .promo-strip .marquee .track{display:flex; align-items:center; gap:28px; width:max-content; will-change:transform; animation:track-scroll 10s linear infinite}
+    .promo-strip .marquee .content{display:inline-flex; align-items:center; gap:28px; white-space:nowrap}
+    @keyframes track-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    .promo-strip .text{font-family:'Bebas Neue', Montserrat, sans-serif; font-weight:400; font-size:clamp(12px,1.6vw,18px); letter-spacing:.5px; text-transform:uppercase; color:#e00000; text-shadow:none; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
+    .promo-strip::after{content:none}
+    /* (limpieza) Se removieron animaciones no utilizadas */
+    @media (max-width:720px){.brand-hero{height:100vh}}
+    /* Sección de marcas */
+    .marcas{margin:60px 0}
+    .marcas h2{margin:0 0 12px}
+    .brand-grid{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:24px}
+    @media (max-width:1000px){.brand-grid{grid-template-columns:repeat(3,1fr)}}
+    @media (max-width:720px){.brand-grid{grid-template-columns:repeat(2,1fr)}}
+    .brand-card{background:transparent; border:none; border-radius:0; box-shadow:none; padding:6px; display:flex; flex-direction:column; align-items:center; justify-content:center}
+    .brand-logo{width:100%; max-height:120px; aspect-ratio:1/1; object-fit:contain; background:transparent; border-radius:0; filter:grayscale(100%) contrast(1.05) brightness(1.02)}
+    .brand-name{display:none}
+    /* --- Ajustes responsivos adicionales para móvil pequeño --- */
+    @media (max-width:480px){
+      /* Navbar: centra la marca y fija los iconos a la derecha */
+      .nav-inner{justify-content:center; padding:10px 0}
+      .brand{position:static; left:auto; transform:none; margin:0 auto}
+      .nav .right{position:absolute; right:12px}
+      .search-wrap.active .search-input{width:140px}
+
+      /* Portada más compacta en móvil */
+      .brand-hero{height:60vh}
+
+      /* Catálogo en 1 columna y menor separación */
+      .grid{grid-template-columns:1fr; gap:20px}
+      .card .info{min-height:auto}
+      .card .title{font-size:.95rem}
+
+      /* Drawer ocupa todo el ancho en móvil */
+      .drawer{width:100%; max-width:100vw}
+
+      /* Cajas de información y contacto más flexibles */
+      .container.info{padding-right:0}
+      .contact-box{max-width:100%; margin:0 auto}
+      .brand-logo{max-height:90px}
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <div class="brand">
+        <div class="logo logo-cholo">GS</div>
+        <div class="name">𝐆𝐒 𝐂𝐀𝐏𝐒</div>
+      </div>
+      <div class="right">
+        <div class="search-wrap" id="searchWrap">
+          <button class="icon-btn" id="searchToggle" aria-label="Buscar" title="Buscar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16" y2="16"/></svg>
+          </button>
+          <input id="searchInput" class="search-input" type="search" placeholder="Buscar modelo..." aria-label="Buscar modelo">
+        </div>
+        <button id="cartBtn" class="icon-btn cart-btn" type="button" aria-label="Canasta" title="Canasta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h15l-2 10H7L6 6z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+          <span id="cartCount" class="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Portada superior (fondo de marcas) -->
+  <section class="container brand-hero-wrap">
+    <div class="brand-hero" aria-label="Portada de marcas">
+      <img class="brand-hero-img" src="https://7hats.mx/cdn/shop/files/IMG_9651.jpg?v=1730070159" alt="Portada de gorras"/>
+    </div>
+  </section>
+
+  <!-- Franja promocional -->
+  <div class="promo-strip" role="note" aria-label="Promoción de envío gratis">
+    <div class="marquee" aria-hidden="true">
+      <div class="track">
+        <div class="content">
+          <span class="text">Envíos a toda la República MX</span>
+          <span class="text">A la compra de 3 gorras el envío es gratis</span>
+          <span class="text">GORRAS CALIDAD G5</span>
+          <span class="text">Envíos a toda la República MX</span>
+          <span class="text">A la compra de 3 gorras el envío es gratis</span>
+          <span class="text">GORRAS CALIDAD G5</span>
+        </div>
+        <div class="content" aria-hidden="true">
+          <span class="text">Envíos a toda la República MX</span>
+          <span class="text">A la compra de 3 gorras el envío es gratis</span>
+          <span class="text">GORRAS CALIDAD G5</span>
+          <span class="text">Envíos a toda la República MX</span>
+          <span class="text">A la compra de 3 gorras el envío es gratis</span>
+          <span class="text">GORRAS CALIDAD G5</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Franja combinada: se unifica la calidad con los envíos para un diseño más minimalista -->
+
+  <!-- Sección: Compra por marcas -->
+  <section class="container marcas">
+    <h2>¡COMPRA POR MARCAS!</h2>
+    <div class="brand-grid">
+      <a class="brand-card" href="#catalogo" aria-label="Filtrar por DANDY HATS">
+        <img class="brand-logo" src="https://th.bing.com/th/id/R.64ad82a4130bf3773347f956f382e64c?rik=fjPaD2l03IP3Tg&riu=http%3a%2f%2ffinesttmerch.com%2fcdn%2fshop%2fcollections%2fDANDY_HATS_COLLECTION.jpg%3fv%3d1678659430&ehk=C2IxLs8BBWUZ%2fuAih5sOkqUOh2tCbbw05kT7OjOrfOQ%3d&risl=&pid=ImgRaw&r=0" alt="DANDY HATS" onerror="this.onerror=null;this.src='https://dummyimage.com/300x200/ffffff/000000.png&text=DANDY+HATS'"/>
+        <div class="brand-name">DANDY HATS</div>
+      </a>
+      <a class="brand-card" href="#catalogo" aria-label="Filtrar por BARBAS HATS">
+        <img class="brand-logo" src="https://elbarbashats.com/cdn/shop/files/tN198101.svg?v=1689202536&width=220" alt="BARBAS HATS" onerror="this.onerror=null;this.src='https://dummyimage.com/300x200/ffffff/000000.png&text=BARBAS+HATS'"/>
+        <div class="brand-name">BARBAS HATS</div>
+      </a>
+      <a class="brand-card" href="#catalogo" aria-label="Filtrar por Thirty One Hats">
+        <img class="brand-logo" src="http://thekingmodacapsmx.com/cdn/shop/collections/EC77530D-203E-41CF-B4FC-A474634DD2B0.webp?v=1727044514" alt="Thirty One Hats" onerror="this.onerror=null;this.src='https://dummyimage.com/300x200/ffffff/000000.png&text=Thirty+One+Hats'"/>
+        <div class="brand-name">Thirty One Hats</div>
+      </a>
+      
+    </div>
+  </section>
+
+  <!-- Catálogo -->
+  <section id="catalogo" class="container" style="margin-bottom:40px">
+    <h2 style="margin:0 0 14px">Catálogo</h2>
+    <h3 style="margin:8px 0 12px; font-weight:600; letter-spacing:0.3px">DANDY HATS</h3>
+    <div class="grid">
+      <!-- Cada tarjeta incluye botón para agregar a la canasta -->
+      <div class="card" data-sku="modelo1" data-title="DANDY CLUB LOS ANGELES" data-price="600" data-image="https://topcapz.com/cdn/shop/files/img_7601-b1ec764d380765e60017188804920484-1024-1024.png?v=1724126376">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo1.html" aria-label="Ver detalles de DANDY CLUB LOS ANGELES">
+            <img class="fit-contain" src="https://topcapz.com/cdn/shop/files/img_7601-b1ec764d380765e60017188804920484-1024-1024.png?v=1724126376" alt="DANDY CLUB LOS ANGELES" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo1.html">DANDY CLUB LOS ANGELES</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista: solo imagen, nombre y precio -->
+      </div>
+
+      <div class="card" data-sku="modelo2" data-title="GORRA DANDY HATS LA DANDY CLUB PURPLE STORM" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/DSC00553_1000x_b9c1d1fc-c7af-4839-9a74-702295b7cb71.webp?v=1726615866&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo2.html" aria-label="Ver detalles de GORRA DANDY HATS LA DANDY CLUB PURPLE STORM">
+            <img src="https://drop-shop.mx/cdn/shop/files/DSC00553_1000x_b9c1d1fc-c7af-4839-9a74-702295b7cb71.webp?v=1726615866&width=713" alt="Gorra urbana modelo 2" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo2.html">GORRA DANDY HATS LA DANDY CLUB PURPLE STORM</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+
+      <div class="card" data-sku="modelo3" data-title="GORRA DANDY HATS LA DANDY CLUB RESTRICTED SAINT" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/DSC00394_1000x_f959cc05-1b7a-4528-bc71-24492f7ea84d.webp?v=1726616034&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo3.html" aria-label="Ver detalles de GORRA DANDY HATS LA DANDY CLUB RESTRICTED SAINT">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/DSC00394_1000x_f959cc05-1b7a-4528-bc71-24492f7ea84d.webp?v=1726616034&width=713" alt="GORRA DANDY HATS LA DANDY CLUB RESTRICTED SAINT" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo3.html">GORRA DANDY HATS LA DANDY CLUB RESTRICTED SAINT</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+
+      <div class="card" data-sku="modelo4" data-title="DANDY HATS x FUERZA REGIDA \"DISTRESSED\"" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/DSC05663_1400x_71a9f234-b959-44ac-a423-1114c6f4386d.webp?v=1730743555&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo4.html" aria-label="Ver detalles de DANDY HATS FUERZA REGIDA DISTRESSED">
+            <img src="https://drop-shop.mx/cdn/shop/files/DSC05663_1400x_71a9f234-b959-44ac-a423-1114c6f4386d.webp?v=1730743555&width=713" alt="Gorra urbana modelo 4" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo4.html">DANDY HATS x FUERZA REGIDA "DISTRESSED"</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+
+      <div class="card" data-sku="modelo5" data-title="DANDY HATS X RUDEAWAKENINGS JESUS" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/90efde16-cee6-4d58-8cb7-f6d83effcd69.jpg?v=1732821088&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo5.html" aria-label="Ver detalles de DANDY HATS X RUDEAWAKENINGS JESUS">
+            <img src="https://drop-shop.mx/cdn/shop/files/90efde16-cee6-4d58-8cb7-f6d83effcd69.jpg?v=1732821088&width=713" alt="Gorra urbana modelo 5" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo5.html">DANDY HATS X RUDEAWAKENINGS JESUS</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+
+      <div class="card" data-sku="modelo6" data-title="GORRA DANDY HATS &quot;EL MAGO&quot; NEGRA" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/IMG-0076.png?v=1736731277&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo6.html" aria-label="Ver detalles de GORRA DANDY HATS &quot;EL MAGO&quot; NEGRA">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/IMG-0076.png?v=1736731277&width=713" alt="GORRA DANDY HATS &quot;EL MAGO&quot; NEGRA" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo6.html">GORRA DANDY HATS &quot;EL MAGO&quot; NEGRA</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+
+      <div class="card" data-sku="modelo7" data-title="GORRA DANDY HATS JUNIOR H SADBOYZ" data-price="600" data-image="https://www.hatsmexico.store/cdn/shop/files/1ED252F5-C854-4193-BEA8-3B7B1AACD2C9.webp?v=1734575936&width=823">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo7.html" aria-label="Ver detalles de GORRA DANDY HATS JUNIOR H SADBOYZ">
+            <img src="https://www.hatsmexico.store/cdn/shop/files/1ED252F5-C854-4193-BEA8-3B7B1AACD2C9.webp?v=1734575936&width=823" alt="GORRA DANDY HATS JUNIOR H SADBOYZ" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo7.html">GORRA DANDY HATS JUNIOR H SADBOYZ</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+
+      <div class="card" data-sku="modelo8" data-title="GORRA DANDY HATS JUNIOR H ANGEL AZUL" data-price="600" data-image="https://www.hatsmexico.store/cdn/shop/files/E848CB7F-1E91-4F4A-BA8C-FF25426A343A.webp?v=1734576009&width=823">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo8.html" aria-label="Ver detalles de GORRA DANDY HATS JUNIOR H ANGEL AZUL">
+            <img class="fit-contain" src="https://www.hatsmexico.store/cdn/shop/files/E848CB7F-1E91-4F4A-BA8C-FF25426A343A.webp?v=1734576009&width=823" alt="GORRA DANDY HATS JUNIOR H ANGEL AZUL" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo8.html">GORRA DANDY HATS JUNIOR H ANGEL AZUL</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+
+      <!-- Nuevo modelo: FR Monogram -->
+      <div class="card" data-sku="modelo9" data-title="GORRA DANDY HATS x FUERZA REGIDA &quot;FR Monogram&quot;" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/DSC05793_1400x_c6c2f3ec-d58a-4745-a4f6-8e1e0537881e.webp?v=1730743779&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo9.html" aria-label="Ver detalles de GORRA DANDY HATS x FUERZA REGIDA FR Monogram">
+            <img src="https://drop-shop.mx/cdn/shop/files/DSC05793_1400x_c6c2f3ec-d58a-4745-a4f6-8e1e0537881e.webp?v=1730743779&width=713" alt="GORRA DANDY HATS x FUERZA REGIDA FR Monogram" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo9.html">GORRA DANDY HATS x FUERZA REGIDA &quot;FR Monogram&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+
+      <!-- Nuevo modelo: JEHOVA -->
+      <div class="card" data-sku="modelo10" data-title="DANDY HATS X RUDE AWAKENING &quot;JEHOVA&quot;" data-price="600" data-image="https://www.belicoimperial.com/cdn/shop/files/B43E7531-D65B-46AF-ADEB-34224A3C52F4.jpg?v=1732418896&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo10.html" aria-label="Ver detalles de DANDY HATS X RUDE AWAKENING JEHOVA">
+            <img class="fit-contain" src="https://www.belicoimperial.com/cdn/shop/files/B43E7531-D65B-46AF-ADEB-34224A3C52F4.jpg?v=1732418896&width=713" alt="DANDY HATS X RUDE AWAKENING JEHOVA" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo10.html">DANDY HATS X RUDE AWAKENING &quot;JEHOVA&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+      
+      <!-- Nuevo modelo: Dandy Hats "Stay Out" -->
+      <div class="card" data-sku="modelo11" data-title="Dandy Hats &quot;Stay Out&quot;" data-price="600" data-image="https://www.belicoimperial.com/cdn/shop/files/erasebg-transformed_14.webp?v=1743542158&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo11.html" aria-label="Ver detalles de Dandy Hats Stay Out">
+            <img class="fit-contain" src="https://www.belicoimperial.com/cdn/shop/files/erasebg-transformed_14.webp?v=1743542158&width=713" alt="Dandy Hats Stay Out" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo11.html">Dandy Hats &quot;Stay Out&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+
+      <!-- Nuevo modelo: DANDY HATS X CANELO "UNDISPUTED" -->
+      <div class="card" data-sku="modelo12" data-title="DANDY HATS X CANELO &quot;UNDISPUTED&quot;" data-price="600" data-image="https://www.belicoimperial.com/cdn/shop/files/IMG_0282.png?v=1759251812&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo12.html" aria-label="Ver detalles de DANDY HATS X CANELO UNDISPUTED">
+            <img class="fit-contain" src="https://www.belicoimperial.com/cdn/shop/files/IMG_0282.png?v=1759251812&width=713" alt="DANDY HATS X CANELO UNDISPUTED" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo12.html">DANDY HATS X CANELO &quot;UNDISPUTED&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+
+      <!-- Nuevo modelo: Dandy Hats "Dandy Moto" -->
+      <div class="card" data-sku="modelo13" data-title="Dandy Hats &quot;Dandy Moto&quot;" data-price="600" data-image="https://www.belicoimperial.com/cdn/shop/files/EF36362B-323B-4486-8A26-A9C72581D0FC.webp?v=1738899971&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo13.html" aria-label="Ver detalles de Dandy Hats Dandy Moto">
+            <img class="fit-contain" src="https://www.belicoimperial.com/cdn/shop/files/EF36362B-323B-4486-8A26-A9C72581D0FC.webp?v=1738899971&width=713" alt="Dandy Hats Dandy Moto" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo13.html">Dandy Hats &quot;Dandy Moto&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+
+      <!-- Nuevo modelo: I LOVE NY -->
+      <div class="card" data-sku="modelo14" data-title="I LOVE NY" data-price="600" data-image="https://www.belicoimperial.com/cdn/shop/files/DSC08058.jpg?v=1732953303&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo14.html" aria-label="Ver detalles de I LOVE NY">
+            <img class="fit-contain" src="https://www.belicoimperial.com/cdn/shop/files/DSC08058.jpg?v=1732953303&width=713" alt="I LOVE NY" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo14.html">I LOVE NY</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+
+      <!-- Nuevo modelo: FUERZA CRYSTALS -->
+      <div class="card" data-sku="modelo15" data-title="FUERZA CRYSTALS" data-price="600" data-image="https://www.belicoimperial.com/cdn/shop/files/DSC05677-Edit_1400x_bfd21c5a-4087-4ca1-baee-fb5c647ad666.webp?v=1732418850&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo15.html" aria-label="Ver detalles de FUERZA CRYSTALS">
+            <img class="fit-contain" src="https://www.belicoimperial.com/cdn/shop/files/DSC05677-Edit_1400x_bfd21c5a-4087-4ca1-baee-fb5c647ad666.webp?v=1732418850&width=713" alt="FUERZA CRYSTALS" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo15.html">FUERZA CRYSTALS</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+        <!-- Vista minimalista -->
+      </div>
+      <!-- Nuevo modelo: DANDY HATS "Onyx" -->
+      <div class="card" data-sku="modelo27" data-title="DANDY HATS &quot;Onyx&quot;" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/IMG-8240.jpg?v=1750391330&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo27.html" aria-label="Ver detalles de DANDY HATS Onyx">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/IMG-8240.jpg?v=1750391330&width=713" alt="DANDY HATS Onyx" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo27.html">DANDY HATS &quot;Onyx&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+
+      <!-- Nuevo modelo: DANDY HATS X TOMBOCHIO -->
+      <div class="card" data-sku="modelo28" data-title="DANDY HATS X TOMBOCHIO" data-price="600" data-image="https://monkeyhats.mx/cdn/shop/files/4_4710bf78-78c6-48cc-ace5-0bfcdc74c611.png?v=1755100920&width=900">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo28.html" aria-label="Ver detalles de DANDY HATS X TOMBOCHIO">
+            <img class="fit-contain" src="https://monkeyhats.mx/cdn/shop/files/4_4710bf78-78c6-48cc-ace5-0bfcdc74c611.png?v=1755100920&width=900" alt="DANDY HATS X TOMBOCHIO" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo28.html">DANDY HATS X TOMBOCHIO</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+    </div>
+    <h3 style="margin:24px 0 8px; font-weight:600; letter-spacing:0.3px">BARBAS HATS</h3>
+    <div class="grid">
+      <!-- Barbas Hats x CT "ORIENTAL TUMBADO" -->
+      <div class="card" data-sku="modelo16" data-title="Barbas Hats x CT &quot;ORIENTAL TUMBADO&quot;" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/e575acba-3f83-4c29-8d23-3bc0b3a5681b.jpg?v=1752198665&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo16.html" aria-label="Ver detalles de Barbas Hats x CT ORIENTAL TUMBADO">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/e575acba-3f83-4c29-8d23-3bc0b3a5681b.jpg?v=1752198665&width=713" alt="Barbas Hats x CT ORIENTAL TUMBADO" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo16.html">Barbas Hats x CT &quot;ORIENTAL TUMBADO&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+
+      <!-- Barbas Hats x CT "27 CT" -->
+      <div class="card" data-sku="modelo17" data-title="Barbas Hats x CT &quot;27 CT&quot;" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/b29840c5-dba4-4dcb-ab9a-2883cb56ddf2.jpg?v=1752199086&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo17.html" aria-label="Ver detalles de Barbas Hats x CT 27 CT">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/b29840c5-dba4-4dcb-ab9a-2883cb56ddf2.jpg?v=1752199086&width=713" alt="Barbas Hats x CT 27 CT" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo17.html">Barbas Hats x CT &quot;27 CT&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+
+      <!-- Barbas Hats x CT "GALAXY CT" GOLD 24K PLATED -->
+      <div class="card" data-sku="modelo18" data-title="Barbas Hats x CT &quot;GALAXY CT&quot; GOLD 24K PLATED" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/a942fc97-e181-46de-af22-cf9da20754b3.jpg?v=1752198929&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo18.html" aria-label="Ver detalles de Barbas Hats x CT GALAXY CT GOLD 24K PLATED">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/a942fc97-e181-46de-af22-cf9da20754b3.jpg?v=1752198929&width=713" alt="Barbas Hats x CT GALAXY CT GOLD 24K PLATED" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo18.html">Barbas Hats x CT &quot;GALAXY CT&quot; GOLD 24K PLATED</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+
+      <!-- Barbas Hats x CT "THREE STARS" -->
+      <div class="card" data-sku="modelo19" data-title="Barbas Hats x CT &quot;THREE STARS&quot;" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/710d063c-2935-4de9-b884-2007ed94d57f.jpg?v=1752198855&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo19.html" aria-label="Ver detalles de Barbas Hats x CT THREE STARS">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/710d063c-2935-4de9-b884-2007ed94d57f.jpg?v=1752198855&width=713" alt="Barbas Hats x CT THREE STARS" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo19.html">Barbas Hats x CT &quot;THREE STARS&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+
+      <!-- Barbas Hats x CT "CHROME CT" -->
+      <div class="card" data-sku="modelo20" data-title="Barbas Hats x CT &quot;CHROME CT&quot;" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/75b250ab-4d8f-4227-8307-3f69c17380e6.jpg?v=1752199051&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo20.html" aria-label="Ver detalles de Barbas Hats x CT CHROME CT">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/75b250ab-4d8f-4227-8307-3f69c17380e6.jpg?v=1752199051&width=713" alt="Barbas Hats x CT CHROME CT" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo20.html">Barbas Hats x CT &quot;CHROME CT&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+
+      <!-- Barbas Hats x Rich The Kid - Rich Stars -->
+      <div class="card" data-sku="modelo21" data-title="Barbas Hats x Rich The Kid - Rich Stars" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/2a391fd3-756e-4744-a26f-ace4b4ab877d.jpg?v=1745518308&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo21.html" aria-label="Ver detalles de Barbas Hats x Rich The Kid - Rich Stars">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/2a391fd3-756e-4744-a26f-ace4b4ab877d.jpg?v=1745518308&width=713" alt="Barbas Hats x Rich The Kid - Rich Stars" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo21.html">Barbas Hats x Rich The Kid - Rich Stars</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+      <!-- Barbas Hats x Rich The Kid - Rich Forever -->
+      <div class="card" data-sku="modelo29" data-title="Barbas Hats x Rich The Kid - Rich Forever" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/8d8d0df2-5551-41a9-9da1-d6dbe700a949.jpg?v=1745518398&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo29.html" aria-label="Ver detalles de Barbas Hats x Rich The Kid - Rich Forever">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/8d8d0df2-5551-41a9-9da1-d6dbe700a949.jpg?v=1745518398&width=713" alt="Barbas Hats x Rich The Kid - Rich Forever" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo29.html">Barbas Hats x Rich The Kid - Rich Forever</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <h3 style="margin:16px 0 8px; font-weight:600; letter-spacing:0.3px">ThirtyOneHats</h3>
+    <div class="grid">
+      <!-- 31 HATS "باكباك بويز" -->
+      <div class="card" data-sku="modelo22" data-title="31 HATS &quot;باكباك بويز&quot;" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/MXXM.webp?v=1753313344&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo22.html" aria-label="Ver detalles de 31 HATS باكباك بويز">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/MXXM.webp?v=1753313344&width=713" alt="31 HATS باكباك بويز" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo22.html">31 HATS &quot;باكباك بويز&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+
+      <!-- 31 HATS "LA MOCHILA" -->
+      <div class="card" data-sku="modelo23" data-title="31 HATS &quot;LA MOCHILA&quot;" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/BACKPACK_ef781406-378f-486a-9a90-a1da94d1122d.webp?v=1753313514&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo23.html" aria-label="Ver detalles de 31 HATS LA MOCHILA">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/BACKPACK_ef781406-378f-486a-9a90-a1da94d1122d.webp?v=1753313514&width=713" alt="31 HATS LA MOCHILA" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo23.html">31 HATS &quot;LA MOCHILA&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+
+      <!-- 31 HATS "BACKPACK BOYZ" -->
+      <div class="card" data-sku="modelo24" data-title="31 HATS &quot;BACKPACK BOYZ&quot;" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/BACKPACKBLACK.webp?v=1753313085&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo24.html" aria-label="Ver detalles de 31 HATS BACKPACK BOYZ">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/BACKPACKBLACK.webp?v=1753313085&width=713" alt="31 HATS BACKPACK BOYZ" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo24.html">31 HATS &quot;BACKPACK BOYZ&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+
+      <!-- 31 HATS "THIRTY ONE GELATO" -->
+      <div class="card" data-sku="modelo25" data-title="31 HATS &quot;THIRTY ONE GELATO&quot;" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/BACKPACKGELATO_6e7d1b33-96de-4859-8e37-f8fcfdf7392d.webp?v=1753313622&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo25.html" aria-label="Ver detalles de 31 HATS THIRTY ONE GELATO">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/BACKPACKGELATO_6e7d1b33-96de-4859-8e37-f8fcfdf7392d.webp?v=1753313622&width=713" alt="31 HATS THIRTY ONE GELATO" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo25.html">31 HATS &quot;THIRTY ONE GELATO&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+
+      <!-- 31 HATS "31 FOREVER BLACK" -->
+      <div class="card" data-sku="modelo26" data-title="31 HATS &quot;31 FOREVER BLACK&quot;" data-price="600" data-image="https://drop-shop.mx/cdn/shop/files/WhatsAppImage2025-09-02at18.09.43_5.jpg?v=1756864773&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo26.html" aria-label="Ver detalles de 31 HATS 31 FOREVER BLACK">
+            <img class="fit-contain" src="https://drop-shop.mx/cdn/shop/files/WhatsAppImage2025-09-02at18.09.43_5.jpg?v=1756864773&width=713" alt="31 HATS 31 FOREVER BLACK" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo26.html">31 HATS &quot;31 FOREVER BLACK&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+      
+      <!-- 31 HATS "MAGO - MAGIC CLUB" -->
+      <div class="card" data-sku="modelo30" data-title="31 HATS &quot;MAGO - MAGIC CLUB&quot;" data-price="600" data-image="https://eltiroscaps.com/cdn/shop/files/WhatsAppImage2025-04-15at09.56.21_11.jpg?v=1744732772&width=713">
+        <div class="img-wrap">
+          <span class="badge">$600</span>
+          <a href="productos/modelo30.html" aria-label="Ver detalles de 31 HATS MAGO - MAGIC CLUB">
+            <img class="fit-contain" src="https://eltiroscaps.com/cdn/shop/files/WhatsAppImage2025-04-15at09.56.21_11.jpg?v=1744732772&width=713" alt="31 HATS MAGO - MAGIC CLUB" />
+          </a>
+          <button class="add-cart" type="button" aria-label="Agregar a la canasta" title="Agregar a la canasta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M6 6h12l-2 12H8L6 6z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <div class="title"><a href="productos/modelo30.html">31 HATS &quot;MAGO - MAGIC CLUB&quot;</a></div>
+          <div class="price">$600 MXN</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Calculadora eliminada por solicitud: la canasta calcula el total -->
+
+  <!-- Información y políticas -->
+  <section class="container info">
+    <div class="box">
+      <h3>Política de precios</h3>
+      <ul class="list">
+        <li>Todas las gorras tienen el mismo costo.</li>
+        <li>Precio mayoreo: $600 MXN por pieza, aplicable a pedidos desde 10 unidades.</li>
+        <li>Para pedidos menores a 10, consulta disponibilidad y tiempos.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Envíos y pagos</h3>
+      <ul class="list">
+        <li>Reliable shipping.</li>
+        <li>Flexible returns.</li>
+        <li>Envíos a toda la República Mexicana.</li>
+        <li>Pagos: transferencia, depósito o efectivo (acordar por WhatsApp).</li>
+        <li>Tiempo de entrega estimado: 2–5 días hábiles.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Contacto -->
+  <section class="container" style="margin:20px 0 40px">
+    <div class="box contact-box">
+      <h3>Contacto</h3>
+      <p style="margin:6px 0">Correo: <a href="mailto:gscaps8@gmail.com">gscaps8@gmail.com</a></p>
+      <p style="margin:6px 0">Teléfono: <a href="tel:+526673042241">667 304 2241</a> · WhatsApp: <a href="https://wa.me/526673042241" target="_blank" rel="noopener">Enviar mensaje</a></p>
+      <p style="margin:10px 0 0; color:#646a73">Horario de atención: Lunes a Sábado · 9:00–19:00 (hora MX). Respuesta rápida.</p>
+    </div>
+  </section>
+
+  <!-- Preguntas frecuentes (acordeón) -->
+  <section class="container faq">
+    <h2 style="margin:0 0 14px">Preguntas frecuentes</h2>
+    <div class="accordion" id="faq">
+      <div class="accordion-item">
+        <button class="accordion-header" aria-expanded="false">¿Cuál es el precio a mayoreo?</button>
+        <div class="accordion-panel" hidden>
+          <p>El precio a mayoreo es de <strong>$600 MXN</strong> por pieza. Aplica para pedidos a partir de 10 gorras.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-header" aria-expanded="false">¿Desde cuántas piezas aplica el precio a mayoreo?</button>
+        <div class="accordion-panel" hidden>
+          <p>A partir de <strong>10 piezas</strong>. Para menos de 10, pregunta por disponibilidad y tiempo de entrega.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-header" aria-expanded="false">¿Qué incluye cada gorra (descripción)?</button>
+        <div class="accordion-panel" hidden>
+          <ul>
+            <li>Etiqueta NFC funcional.</li>
+            <li>Todos los detalles por dentro y por fuera.</li>
+            <li>Bordados de alta calidad.</li>
+            <li>Incluye el cartón personalizado de cada marca por dentro.</li>
+            <li>No full set.</li>
+          </ul>
+          <p>Todas son ajustables y unisex.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-header" aria-expanded="false">¿Cómo son los envíos y cuánto tardan?</button>
+        <div class="accordion-panel" hidden>
+          <p>Envíos a toda la República Mexicana. Tiempo estimado de entrega: <strong>2–5 días hábiles</strong>. Se calcula costo de envío al pagar.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-header" aria-expanded="false">¿Qué formas de pago aceptan?</button>
+        <div class="accordion-panel" hidden>
+          <p>Aceptamos transferencia, depósito o efectivo (coordinado por WhatsApp). Próximamente se añadirá pago con tarjeta.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-header" aria-expanded="false">¿Puedo hacer cambios o devoluciones?</button>
+        <div class="accordion-panel" hidden>
+          <p>Ofrecemos <strong>Flexible returns</strong> en casos de defecto de fábrica reportados dentro de 48 horas tras la entrega. Contáctanos por WhatsApp para gestionar tu caso.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Drawer de canasta -->
+  <div id="overlay" class="overlay"></div>
+  <aside id="cartDrawer" class="drawer" aria-hidden="true">
+    <div class="head">
+      <strong>Canasta</strong>
+      <button id="closeCart" class="btn" type="button">Cerrar</button>
+    </div>
+    <div class="items" id="cartItems"></div>
+    <div class="foot">
+      <div class="row"><span>Subtotal</span> <strong id="cartTotal">$0 MXN</strong></div>
+      <button id="checkout" class="btn primary" type="button">Pagar por WhatsApp</button>
+      <p style="color:var(--muted); font-size:12px; margin-top:8px">Los impuestos y gastos de envío se calculan en el pago.</p>
+    </div>
+  </aside>
+
+  <footer>
+    <div class="container">
+      © 2025 G5 Caps. Sitio demo — reemplaza imágenes y datos cuando lo necesites.
+    </div>
+  </footer>
+  <script src="inventory.js"></script>
+  <script>
+    // Canasta
+    (function(){
+      const cartBtn = document.getElementById('cartBtn');
+      const cartCount = document.getElementById('cartCount');
+      const drawer = document.getElementById('cartDrawer');
+      const overlay = document.getElementById('overlay');
+      const closeCart = document.getElementById('closeCart');
+      const itemsEl = document.getElementById('cartItems');
+      const cartTotal = document.getElementById('cartTotal');
+      const checkout = document.getElementById('checkout');
+
+      let cart = [];
+      try{ cart = JSON.parse(localStorage.getItem('g5_cart')||'[]') }catch(e){ cart = [] }
+
+      function save(){ localStorage.setItem('g5_cart', JSON.stringify(cart)); }
+      function count(){ return cart.reduce((a,b)=>a+b.qty,0) }
+      function sum(){ return cart.reduce((s,i)=>s+i.price*i.qty,0) }
+
+      function render(){
+        itemsEl.innerHTML = '';
+        if(cart.length===0){
+          itemsEl.innerHTML = '<p style="color:#666;">Tu canasta está vacía. Agrega gorras desde el catálogo.</p>';
+        }else{
+          cart.forEach((it,idx)=>{
+            const row = document.createElement('div');
+            row.className = 'item';
+            row.innerHTML = `
+              <img src="${it.image}" alt="${it.title}">
+              <div>
+                <div style="font-weight:600">${it.title}</div>
+                <div style="color:#666">$${it.price.toLocaleString('es-MX')} MXN</div>
+              </div>
+              <div style="text-align:right">
+                <div class="qty">
+                  <button aria-label="menos" data-act="dec" data-i="${idx}">-</button>
+                  <span>${it.qty}</span>
+                  <button aria-label="más" data-act="inc" data-i="${idx}">+</button>
+                </div>
+                <button style="margin-top:6px" class="btn" data-act="del" data-i="${idx}">Quitar</button>
+              </div>`;
+            itemsEl.appendChild(row);
+          });
+        }
+        cartCount.textContent = count();
+        cartTotal.textContent = '$' + sum().toLocaleString('es-MX') + ' MXN';
+        save();
+      }
+
+      function open(){ drawer.classList.add('active'); overlay.classList.add('active'); drawer.setAttribute('aria-hidden','false'); }
+      function close(){ drawer.classList.remove('active'); overlay.classList.remove('active'); drawer.setAttribute('aria-hidden','true'); }
+
+      overlay.addEventListener('click', close);
+      closeCart.addEventListener('click', close);
+      cartBtn.addEventListener('click', open);
+
+      const INV = window.INVENTORY || {};
+      document.querySelectorAll('.card').forEach(card => {
+        const title = card.dataset.title || card.querySelector('.title')?.textContent || 'Gorra G5';
+        const price = parseFloat(card.dataset.price || '600');
+        const image = card.dataset.image || card.querySelector('img')?.src || '';
+        const sku = card.dataset.sku || null;
+        // Marcar sin stock
+        const stock = sku && INV[sku] ? Number(INV[sku].stock || 0) : undefined;
+        if(stock !== undefined && stock <= 0){
+          card.classList.add('out-of-stock');
+          const badge = card.querySelector('.badge');
+          if(badge){ badge.textContent = 'SIN STOCK'; }
+          const btnOut = card.querySelector('.add-cart');
+          if(btnOut){ btnOut.setAttribute('disabled',''); btnOut.setAttribute('aria-disabled','true'); btnOut.title = 'Sin stock'; }
+        }
+        const btn = card.querySelector('.add-cart');
+        if(btn){
+          btn.addEventListener('click', () => {
+            // Bloquear si no hay stock
+            if(card.classList.contains('out-of-stock')){
+              try{
+                let t=document.getElementById('addToast');
+                if(!t){
+                  t=document.createElement('div');
+                  t.id='addToast';
+                  t.setAttribute('role','status');
+                  t.style.position='fixed';
+                  t.style.bottom='16px';
+                  t.style.left='50%';
+                  t.style.transform='translateX(-50%)';
+                  t.style.background='#111';
+                  t.style.color='#fff';
+                  t.style.padding='10px 16px';
+                  t.style.borderRadius='999px';
+                  t.style.boxShadow='0 8px 20px rgba(0,0,0,.2)';
+                  t.style.zIndex='1000';
+                  t.style.opacity='0';
+                  t.style.transition='opacity .25s';
+                  document.body.appendChild(t);
+                }
+                t.textContent='Sin stock';
+                requestAnimationFrame(()=>{ t.style.opacity='1'; });
+                setTimeout(()=>{ t.style.opacity='0'; },1500);
+              }catch(e){}
+              return;
+            }
+            const existing = cart.findIndex(i => i.title === title);
+            if(existing>=0){ cart[existing].qty += 1; }
+            else{ cart.push({title, price, image, qty:1}); }
+            render();
+            // Aviso no intrusivo en catálogo (sin abrir la canasta)
+            try{
+              let t=document.getElementById('addToast');
+              if(!t){
+                t=document.createElement('div');
+                t.id='addToast';
+                t.setAttribute('role','status');
+                t.style.position='fixed';
+                t.style.bottom='16px';
+                t.style.left='50%';
+                t.style.transform='translateX(-50%)';
+                t.style.background='#111';
+                t.style.color='#fff';
+                t.style.padding='10px 16px';
+                t.style.borderRadius='999px';
+                t.style.boxShadow='0 8px 20px rgba(0,0,0,.2)';
+                t.style.zIndex='1000';
+                t.style.opacity='0';
+                t.style.transition='opacity .25s';
+                document.body.appendChild(t);
+              }
+              t.textContent='Agregado a la canasta';
+              requestAnimationFrame(()=>{ t.style.opacity='1'; });
+              setTimeout(()=>{ t.style.opacity='0'; },1500);
+            }catch(e){}
+          });
+        }
+      });
+
+      itemsEl.addEventListener('click', (e)=>{
+        const t = e.target; const act = t.getAttribute('data-act'); const i = parseInt(t.getAttribute('data-i')||'-1',10);
+        if(Number.isFinite(i) && i>=0){
+          if(act==='inc'){ cart[i].qty += 1; }
+          else if(act==='dec'){ cart[i].qty = Math.max(1, cart[i].qty - 1); }
+          else if(act==='del'){ cart.splice(i,1); }
+          render();
+        }
+      });
+
+      checkout.addEventListener('click', ()=>{
+        if(cart.length===0){ open(); return; }
+        const total = sum();
+        const lines = cart.map(i=>`${i.qty}x ${i.title} ($${i.price} c/u)`).join('%0A');
+        // Generar ticket único (demo)
+        const ticket = `G5-${Date.now()}`;
+        try{ localStorage.setItem('g5_last_ticket', ticket); }catch(e){}
+        const msg = `Hola, quiero comprar:%0A${lines}%0A%0ASubtotal: $${total.toLocaleString('es-MX')} MXN%0A%0ATicket: ${ticket}`;
+        const waNumber = '526673042241'; // MX + 6673042241
+        window.open(`https://wa.me/${waNumber}?text=${msg}`, '_blank');
+        alert(`Tu ticket de compra es: ${ticket}. Envíalo por WhatsApp para recibir el rastreo.`);
+      });
+
+      // Si la URL trae ?cart=open, abrir la canasta al cargar
+      render();
+      try{
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('cart') === 'open') open();
+      }catch(e){}
+    })();
+  </script>
+  <!-- Barra de progreso: Envío gratis al agregar 3 gorras -->
+  <div id="free-shipping-bar" class="fsb" role="status" aria-live="polite">
+    <div id="fsb-progress"><div id="fsb-progress-fill"></div></div>
+    <div id="fsb-text">Agrega 3 gorras para envío gratis</div>
+  </div>
+  <script src="script.js" defer></script>
+  <script src="free-shipping.js" defer></script>
+</body>
+</html>

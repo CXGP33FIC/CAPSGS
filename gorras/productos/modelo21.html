@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalle de gorra — Barbas Hats x Rich The Kid - Rich Stars</title>
+  <link rel="stylesheet" href="../css.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Bebas+Neue&family=Black+Ops+One&family=Bungee:wght@400&display=swap" rel="stylesheet">
+  <style>
+    .detalle-container{max-width:1000px;margin:40px auto;padding:0 16px}
+    .breadcrumb a{color:#666;text-decoration:none}
+    .breadcrumb{font-size:14px;margin-bottom:16px}
+    .detalle-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    .galeria{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .galeria img{width:100%;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.08);object-fit:contain;background:#fff}
+    .info h1{font-family:'Bebas Neue','Black Ops One','Bungee',system-ui;letter-spacing:.05em;font-size:44px;margin:0 0 8px}
+    .precio{font-size:22px;font-weight:700;margin:12px 0}
+    .desc{color:#555;line-height:1.6}
+    .acciones{margin-top:16px;display:flex;gap:12px}
+    .btn{padding:12px 16px;border-radius:10px;border:1px solid #ddd;background:#111;color:#fff;cursor:pointer}
+    .btn.sec{background:#fff;color:#111}
+  </style>
+  <script src="../inventory.js"></script>
+  <script>window.scrollTo(0,0)</script>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <div class="logo logo-cholo">GS</div>
+      <div class="header-actions">
+        <button id="backBtn" class="icon-btn" aria-label="Regresar">←</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="detalle-container">
+    <nav class="breadcrumb"><a href="../paginaweb.html">Inicio</a> · Barbas Hats x Rich The Kid - Rich Stars</nav>
+    <div class="detalle-grid">
+      <div class="galeria">
+        <img src="https://drop-shop.mx/cdn/shop/files/2a391fd3-756e-4744-a26f-ace4b4ab877d.jpg?v=1745518308&width=713" alt="Barbas Hats x Rich The Kid - Rich Stars"/>
+      </div>
+      <div class="info">
+        <h1>Barbas Hats x Rich The Kid - Rich Stars</h1>
+        <div class="precio">$ 600 MXN</div>
+        <p class="desc">Colaboración con Rich The Kid, con motivos de estrellas y branding distintivo. Materiales premium e incluye empaque de edición especial.</p>
+        <ul class="desc">
+          <li>Colaboración especial</li>
+          <li>Materiales premium</li>
+          <li>Talla: única ajustable</li>
+          <li>Envíos a todo México</li>
+        </ul>
+        <div class="acciones">
+          <button class="btn" id="addCartBtn">Agregar a la canasta</button>
+          <a class="btn sec" href="https://wa.me/526673042241?text=Quiero%20la%20Barbas%20Hats%20x%20Rich%20The%20Kid%20Rich%20Stars" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (function(){
+      const back=document.getElementById('backBtn');
+      back?.addEventListener('click',()=>{ if(history.length>1) history.back(); else window.location.href='../paginaweb.html'; });
+      const title='Barbas Hats x Rich The Kid - Rich Stars';
+      const price=600;
+      const image='https://drop-shop.mx/cdn/shop/files/2a391fd3-756e-4744-a26f-ace4b4ab877d.jpg?v=1745518308&width=713';
+      // Detectar SKU por URL para evitar redeclaraciones y mantener consistencia
+      const btn=document.getElementById('addCartBtn');
+      const match=location.pathname.match(/modelo(\d+)\.html$/);
+      const sku=match?('modelo'+match[1]):null;
+      const INV=window.INVENTORY||{}; const stock=(sku&&INV[sku])?Number(INV[sku].stock||0):0;
+      if(stock===0){ btn.disabled=true; btn.textContent='Sin stock'; btn.style.opacity='.6'; }
+      btn?.addEventListener('click',()=>{
+        if(btn.disabled){return}
+        try{ const cart=JSON.parse(localStorage.getItem('g5_cart')||'[]'); const idx=cart.findIndex(i=>i.title===title); if(idx>=0){cart[idx].qty+=1}else{cart.push({title,price,image,qty:1})} localStorage.setItem('g5_cart',JSON.stringify(cart)); }catch(e){}
+        try{ let t=document.getElementById('addToast'); if(!t){ t=document.createElement('div'); t.id='addToast'; t.setAttribute('role','status'); t.style.position='fixed'; t.style.bottom='16px'; t.style.left='50%'; t.style.transform='translateX(-50%)'; t.style.background='#111'; t.style.color='#fff'; t.style.padding='10px 16px'; t.style.borderRadius='999px'; t.style.boxShadow='0 8px 20px rgba(0,0,0,.2)'; t.style.zIndex='1000'; t.style.opacity='0'; t.style.transition='opacity .25s'; document.body.appendChild(t);} t.textContent='Agregado a la canasta'; requestAnimationFrame(()=>{ t.style.opacity='1'; }); setTimeout(()=>{ t.style.opacity='0'; },1500);}catch(e){}
+      });
+    })();
+  </script>
+</body>
+</html>

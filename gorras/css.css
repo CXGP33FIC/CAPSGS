@@ -1,0 +1,91 @@
+/* Estilos del acordeón (FAQ) */
+.faq{margin:20px 0 40px}
+.accordion{border:1px solid #e7e9ee; border-radius:16px; overflow:hidden; background:#fff; box-shadow:0 10px 25px rgba(0,0,0,.06)}
+.accordion-item{border-top:1px solid #e7e9ee}
+.accordion-item:first-child{border-top:none}
+.accordion-header{width:100%; text-align:left; padding:16px 18px; background:#fff; border:0; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between}
+.accordion-header:hover{background:#f7f8fb}
+.accordion-header:focus{outline:2px solid #cfd6e6; outline-offset:-2px}
+.accordion-header::after{content:""; display:inline-block; width:16px; height:16px; border-right:2px solid #111; border-bottom:2px solid #111; transform:rotate(-45deg); transition:.2s ease}
+.accordion-header[aria-expanded="true"]::after{transform:rotate(45deg)}
+.accordion-header[aria-expanded="true"]{background:#f7f8fb}
+/* Panel con transición suave (se controla vía hermano adyacente del header) */
+.accordion-panel{background:#fafbff; border-top:1px solid #e7e9ee; overflow:hidden; max-height:0; opacity:0; padding:0 18px; transition:max-height .25s ease, opacity .25s ease, padding .25s ease}
+.accordion-header[aria-expanded="true"] + .accordion-panel{max-height:600px; opacity:1; padding:12px 18px}
+.accordion-panel p{margin:0 0 8px}
+.accordion-panel ul{margin:0; padding-left:18px}
+
+/* Utilidades pequeñas */
+.text-muted{color:#646a73}
+
+/* Cabecera minimal con iconos */
+.icon-btn{border:1px solid #e7e9ee; background:#fff; width:40px; height:40px; border-radius:10px; display:grid; place-items:center; cursor:pointer}
+.icon-btn svg{width:20px; height:20px}
+.search-input{width:0; opacity:0; transition:.2s; border:1px solid #e7e9ee; border-radius:10px; padding:8px 10px}
+.search-wrap.active .search-input{width:220px; opacity:1}
+
+/* Tarjetas minimalistas */
+.card{background:#fff; border:1px solid #e7e9ee; border-radius:16px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 10px 25px rgba(0,0,0,.06)}
+.card .img-wrap{position:relative; aspect-ratio:1/1; background:#f1f2f6}
+.card .img-wrap:hover{box-shadow:0 8px 18px rgba(0,0,0,.08)}
+.card .info{padding:14px}
+.badge{position:absolute; top:12px; left:12px; background:#111; color:#fff; padding:6px 10px; border-radius:999px; font-size:.75rem; font-weight:700}
+/* Fuente personalizada para el título (opcional).
+   IMPORTANTE: deshabilitada para evitar una petición fallida a un archivo inexistente
+   (./fonts/cholo-letters.woff2). Si quieres usarla, coloca el archivo en gorras/fonts/
+   y vuelve a habilitar este bloque.
+@font-face {
+  font-family: 'CholoLetters';
+  src: url('./fonts/cholo-letters.woff2') format('woff2');
+  font-display: swap;
+}
+*/
+
+/* Aplicación del estilo al título y logo cuando existan las clases en el HTML */
+.name-cholo{font-family:'CholoLetters','Black Ops One','Bungee',Montserrat,sans-serif; font-size:1.8rem; letter-spacing:.8px}
+.logo-cholo{font-family:'CholoLetters','Black Ops One','Bungee',Montserrat,sans-serif}
+
+/* Más espacio entre productos */
+.grid{gap:48px !important}
+
+/* Modal de login */
+.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; z-index:1000}
+.modal-overlay.open{display:flex}
+.modal{background:#0b0b0b; color:#f5f5f5; border:1px solid #262626; border-radius:18px; padding:22px; box-shadow:0 24px 48px rgba(0,0,0,.45); width:380px; max-width:92vw; backdrop-filter:blur(6px)}
+.modal h3{margin:0 0 10px; font-family:Montserrat,system-ui; letter-spacing:.6px}
+.field{display:flex; flex-direction:column; gap:6px; margin-bottom:12px}
+.field label{font-size:.9rem; color:#c9c9c9}
+.field input{border:1px solid #2d2d2d; border-radius:12px; padding:12px 14px; background:#101010; color:#f5f5f5}
+.actions{display:flex; gap:10px; justify-content:flex-end; margin-top:8px}
+.btn{padding:12px 16px; border-radius:12px; border:1px solid #2d2d2d; background:#121212; color:#fff; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease, opacity .15s}
+.btn:hover{transform:translateY(-1px); box-shadow:0 10px 20px rgba(0,0,0,.35)}
+.btn.sec{background:#1b1b1b; color:#f5f5f5}
+.btn.danger{background:#b00020; color:#fff; border-color:#b00020}
+.btn.gold{background:linear-gradient(135deg,#e5c100 0%,#caa000 50%,#8d6f00 100%); border-color:#a58a00; color:#111; font-weight:700}
+.btn.gold:hover{box-shadow:0 12px 24px rgba(197,155,0,.35)}
+.user-text{margin-left:8px; font-weight:700; font-family:Montserrat,system-ui;}
+
+/* Lightbox (ampliar imagen) */
+.lightbox-overlay{position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:1000}
+.lightbox-overlay.open{display:flex}
+.lightbox-img{max-width:90vw; max-height:90vh; border-radius:12px; box-shadow:0 20px 40px rgba(0,0,0,.4); animation:lb-zoom .18s ease}
+@keyframes lb-zoom{from{transform:scale(.96); opacity:.7} to{transform:scale(1); opacity:1}}
+/* Cursor indicativo en galerías de producto */
+.galeria img{cursor:zoom-in}
+
+/* Barra de progreso para envío gratis (3 gorras) — interfaz como antes, texto negro y barra más pequeña no tricolor */
+.fsb{position:fixed; left:14px; right:14px; bottom:14px; background:#fff; color:#000; border:1px solid #ddd; border-radius:14px; padding:8px 12px; box-shadow:0 10px 24px rgba(0,0,0,.18); z-index:1000}
+@media (max-width:480px){.fsb{left:8px; right:8px; bottom:8px}}
+#fsb-progress{height:8px; background:#eaeaea; border-radius:999px; overflow:hidden}
+#fsb-progress-fill{height:100%; width:0%; background:#e00000; transition:width .25s ease}
+#fsb-text{margin-top:6px; font-size:13px; text-align:center; color:#000}
+.fsb.complete #fsb-text{font-weight:700}
+
+/* Ajustes responsivos para páginas de producto (mobile) */
+@media (max-width:720px){
+  .detalle-container{margin:20px auto !important; padding:0 12px !important}
+  .detalle-grid{grid-template-columns:1fr !important; gap:16px !important}
+  .galeria{grid-template-columns:1fr !important; gap:8px !important}
+  .galeria img{box-shadow:none !important}
+  .info h1{font-size:36px !important}
+}

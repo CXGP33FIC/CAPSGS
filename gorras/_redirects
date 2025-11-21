@@ -1,0 +1,4 @@
+/ /paginaweb.html 301!
+
+# Opcional: si se accede directamente a /index.html, servir el catálogo.
+/index.html /paginaweb.html 200
