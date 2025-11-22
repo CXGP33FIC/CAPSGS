@@ -91,11 +91,12 @@
     .list{margin:0; padding-left:18px; color:var(--muted)}
     footer{border-top:1px solid var(--border); padding:30px 0; color:var(--muted)}
 
-    /* Portada superior para marcas (full-bleed). Mostrar imagen completa sin recortes y rellenar las orillas con un fondo suavemente desenfocado */
     .brand-hero-wrap{padding:0 !important}
-.brand-hero{height:100vh; width:100vw; margin:0; border:none; border-radius:0; position:relative; left:50%; transform:translateX(-50%); overflow:hidden; background-color:#fff; display:flex; align-items:center; justify-content:center}
-    .brand-hero::before{content:""; position:absolute; inset:0; background:url('https://7hats.mx/cdn/shop/files/IMG_9651.jpg?v=1730070159') center/cover no-repeat; filter:blur(18px) brightness(.98); transform:scale(1.05)}
-.brand-hero-img{position:relative; z-index:1; width:100%; height:100%; object-fit:contain; object-position:center; display:block}
+    .brand-hero{height:100vh; width:100vw; margin:0; border:none; border-radius:0; position:relative; left:50%; transform:translateX(-50%); overflow:hidden; background-color:#fff; display:flex; align-items:center; justify-content:center}
+    .float-img{position:relative; z-index:2; width:min(720px,80vw); height:auto; object-fit:contain; object-position:center; animation:float-y 3.5s ease-in-out infinite alternate}
+    .float-shadow{position:absolute; z-index:1; bottom:12vh; width:min(360px,60vw); height:22px; background:radial-gradient(ellipse at center, rgba(0,0,0,.26) 0%, rgba(0,0,0,0) 60%); filter:blur(1.5px); opacity:.35; animation:shadow-pulse 3.5s ease-in-out infinite alternate}
+    @keyframes float-y{from{transform:translateY(0)}to{transform:translateY(-18px)}}
+    @keyframes shadow-pulse{from{transform:scale(1)}to{transform:scale(.95); opacity:.30}}
     /* Franja promocional dorada entre portada y marcas (alta legibilidad) */
     .promo-strip{position:relative; z-index:5; padding:14px 0; background:transparent; border-top:none; border-bottom:none; box-shadow:none; overflow:hidden}
     /* Marquee continuo sin recortes: pista con contenido duplicado */
@@ -167,8 +168,9 @@
 
   <!-- Portada superior (fondo de marcas) -->
   <section class="container brand-hero-wrap">
-    <div class="brand-hero" aria-label="Portada de marcas">
-      <img class="brand-hero-img" src="https://7hats.mx/cdn/shop/files/IMG_9651.jpg?v=1730070159" alt="Portada de gorras"/>
+    <div class="brand-hero" aria-label="Gorra flotante">
+      <img class="float-img" src="https://topcapz.com/cdn/shop/files/img_7601-b1ec764d380765e60017188804920484-1024-1024.png?v=1724126376" alt="Gorra flotando"/>
+      <div class="float-shadow"></div>
     </div>
   </section>
 
